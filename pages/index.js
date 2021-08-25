@@ -44,7 +44,7 @@ export async function getStaticProps() {
   const blogPosts = await fetchBlogPosts(
     'mtliendo',
     'sample-ssr',
-    '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'
+    process.env.GITHUB_TOKEN
   )
 
   let formattedBlogPosts = []
@@ -71,4 +71,3 @@ export async function getStaticProps() {
     props: { blogsData: formattedBlogPosts },
   }
 }
-// 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

@@ -61,7 +61,7 @@ export async function getStaticPaths() {
   const blogPosts = await fetchBlogPostsIDs(
     'mtliendo',
     'sample-ssr',
-    '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'
+    process.env.GITHUB_TOKEN
   )
   const paths = blogPosts.map((blogPost) => ({
     params: { blogId: blogPost.number.toString() },
@@ -77,7 +77,7 @@ export async function getStaticProps({ params }) {
   const blogPost = await fetchBlogPost(
     'mtliendo',
     'sample-ssr',
-    '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',
+    process.env.GITHUB_TOKEN,
     params.blogId
   )
   const id = blogPost.number
