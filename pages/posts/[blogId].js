@@ -26,11 +26,10 @@ const FormattedCode = ({ className, children }) => {
     />
   )
 }
-function Post({ blogData }) {
-  console.log(blogData)
+function Post({ blogData = {} }) {
   return (
     <div>
-      {blogData.headerImage.src && (
+      {blogData.headerImage?.src && (
         <div>
           <Image
             src={blogData.headerImage.src}
@@ -88,7 +87,9 @@ export async function getStaticProps({ params }) {
     tag: label.name,
     color: label.color,
   }))
-  console.log(blogPost)
+  // console.log(blogPost)
+  console.log(JSON.stringify(blogPost.comments.nodes[0]?.body, null, 2))
+
   const headerImageString = blogPost.comments.nodes[0]?.body || null
   return {
     props: {

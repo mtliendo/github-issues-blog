@@ -6,7 +6,6 @@ import styles from '../styles/Home.module.css'
 import { parseImageMarkdown } from '../utils'
 
 export default function Home({ blogsData }) {
-  console.log(blogsData)
   return (
     <div className={styles.container}>
       <Head>
