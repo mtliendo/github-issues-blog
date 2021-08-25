@@ -1,8 +1,12 @@
 import Head from 'next/head'
 import Image from 'next/image'
+import Link from 'next/link'
+import { fetchBlogPosts } from '../graphql/queries'
 import styles from '../styles/Home.module.css'
+import { parseImageMarkdown } from '../utils'
 
-export default function Home() {
+export default function Home({ blogsData }) {
+  console.log(blogsData)
   return (
     <div className={styles.container}>
       <Head>
@@ -11,59 +15,60 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <h1>Welcome to my blog!</h1>
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+        {blogsData.map((blogData) => (
+          <article className={styles.card} key={blogData.id}>
+            <div style={{ width: '300px' }}>
+              {blogData.headerImage.src && (
+                <Image
+                  src={blogData.headerImage.src}
+                  blurDataURL={blogData.headerImage.base64}
+                  placeholder="blur"
+                  width={blogData.headerImage.img.width}
+                  height={blogData.headerImage.img.height}
+                />
+              )}
+              <h2 className={styles.title}>
+                <Link href={`/posts/${blogData.id}`}>{blogData.title}</Link>
+              </h2>
+            </div>
+          </article>
+        ))}
       </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
     </div>
   )
 }
+
+export async function getStaticProps() {
+  const blogPosts = await fetchBlogPosts(
+    'mtliendo',
+    'sample-ssr',
+    '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'
+  )
+
+  let formattedBlogPosts = []
+  for (let blogPost of blogPosts) {
+    const id = blogPost.number
+    const author = blogPost.author.login
+    const title = blogPost.title
+    const headerImageString = blogPost.comments.nodes[0]?.body || null
+    const tags = blogPost.labels.nodes.map((label) => ({
+      tag: label.name,
+      color: label.color,
+    }))
+    const parsedHeaderImage = await parseImageMarkdown(headerImageString)
+    formattedBlogPosts.push({
+      id,
+      author,
+      title,
+      tags,
+      headerImage: parsedHeaderImage,
+    })
+  }
+
+  return {
+    props: { blogsData: formattedBlogPosts },
+  }
+}
+// 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
